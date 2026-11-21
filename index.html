@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ArqComp · Operação Impostor</title>
+  <meta name="description" content="Jogos de Arquitetura Computacional: cruzadinha, quem é o impostor e tarefas da nave.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='14' y='14' width='72' height='72' rx='20' fill='%23e5202f' stroke='%230a0e1f' stroke-width='6'/%3E%3Crect x='28' y='34' width='44' height='28' rx='12' fill='%230d1530'/%3E%3Ccircle cx='41' cy='48' r='5' fill='%238ff7ff'/%3E%3Ccircle cx='59' cy='48' r='5' fill='%238ff7ff'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Mascote original "Bit": um chip astronauta. A cor muda pela variável --c -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <clipPath id="bit-clip"><rect x="16" y="22" width="68" height="70" rx="20"/></clipPath>
+  </defs>
+  <symbol id="bit" viewBox="0 0 100 112">
+    <!-- antena -->
+    <line x1="50" y1="22" x2="50" y2="10" stroke="#0a0e1f" stroke-width="8" stroke-linecap="round"/>
+    <line x1="50" y1="22" x2="50" y2="10" stroke="#aebcdf" stroke-width="3.5" stroke-linecap="round"/>
+    <circle class="bit-bulb" cx="50" cy="8" r="6" fill="#ff3b4a" stroke="#0a0e1f" stroke-width="3"/>
+    <!-- pinos dourados -->
+    <g fill="#f0c24b" stroke="#0a0e1f" stroke-width="3">
+      <rect x="6"  y="36" width="14" height="8" rx="2.5"/><rect x="6"  y="50" width="14" height="8" rx="2.5"/><rect x="6"  y="64" width="14" height="8" rx="2.5"/>
+      <rect x="80" y="36" width="14" height="8" rx="2.5"/><rect x="80" y="50" width="14" height="8" rx="2.5"/><rect x="80" y="64" width="14" height="8" rx="2.5"/>
+      <rect x="30" y="88" width="8" height="14" rx="2.5"/><rect x="46" y="88" width="8" height="14" rx="2.5"/><rect x="62" y="88" width="8" height="14" rx="2.5"/>
+    </g>
+    <!-- corpo -->
+    <rect x="16" y="22" width="68" height="70" rx="20" fill="var(--c, #e5202f)"/>
+    <g clip-path="url(#bit-clip)">
+      <rect x="16" y="62" width="68" height="34" fill="#000" opacity=".22"/>
+      <ellipse cx="34" cy="30" rx="16" ry="6" fill="#fff" opacity=".28" transform="rotate(-18 34 30)"/>
+    </g>
+    <rect x="16" y="22" width="68" height="70" rx="20" fill="none" stroke="#0a0e1f" stroke-width="5"/>
+    <!-- tela do rosto -->
+    <rect x="27" y="35" width="46" height="30" rx="13" fill="#0d1530" stroke="#0a0e1f" stroke-width="3"/>
+    <circle class="bit-eye" cx="41" cy="48" r="5.2" fill="#8ff7ff"/>
+    <circle class="bit-eye" cx="59" cy="48" r="5.2" fill="#8ff7ff"/>
+    <path d="M43 57 Q50 62 57 57" fill="none" stroke="#8ff7ff" stroke-width="3" stroke-linecap="round"/>
+    <!-- etiqueta do chip -->
+    <rect x="34" y="73" width="32" height="4" rx="2" fill="#fff" opacity=".4"/>
+    <rect x="40" y="81" width="20" height="4" rx="2" fill="#fff" opacity=".4"/>
+  </symbol>
+</svg>
+
+<canvas id="stars" aria-hidden="true"></canvas>
+
+<div class="app">
+  <header class="topbar">
+    <a class="brand" href="#/" aria-label="Voltar ao menu principal">
+      <svg class="bit brand-bit" viewBox="0 0 100 112" aria-hidden="true"><use href="#bit"/></svg>
+      <span class="brand-text"><b>ARQCOMP</b><small>Operação Impostor</small></span>
+    </a>
+    <a class="btn btn-small btn-ghost" id="btn-menu" href="#/" hidden>&larr; Menu</a>
+  </header>
+  <div class="hazard" aria-hidden="true"></div>
+
+  <main>
+
+    <!-- ============ TELA INICIAL ============ -->
+    <section id="view-home" class="view" aria-labelledby="home-title">
+      <div class="hero">
+        <div class="floaters" aria-hidden="true">
+          <svg class="bit f1" viewBox="0 0 100 112" style="--c:#2a62ff"><use href="#bit"/></svg>
+          <svg class="bit f2" viewBox="0 0 100 112" style="--c:#2edb6a"><use href="#bit"/></svg>
+          <svg class="bit f3" viewBox="0 0 100 112" style="--c:#ff5fc0"><use href="#bit"/></svg>
+          <svg class="bit f4" viewBox="0 0 100 112" style="--c:#f6d90e"><use href="#bit"/></svg>
+        </div>
+
+        <div class="hero-main">
+          <svg class="bit hero-bit" viewBox="0 0 100 112" aria-hidden="true"><use href="#bit"/></svg>
+          <div>
+            <p class="kicker"><span class="siren" aria-hidden="true"></span>Alerta na nave</p>
+            <h1 id="home-title">Tem um <span class="red">impostor</span><br>na placa-mãe!</h1>
+            <p class="lead">Treine Arquitetura Computacional em três missões: resolva a cruzadinha, descubra o componente intruso e complete as tarefas da nave.</p>
+          </div>
+        </div>
+
+        <aside class="badge panel" aria-label="Identificação do aluno">
+          <div class="badge-head"><span class="badge-hole" aria-hidden="true"></span>Crachá da tripulação</div>
+          <dl>
+            <div><dt>Tripulante</dt><dd>João Pedro Sakamoto Murata Hashimoto</dd></div>
+            <div><dt>Turma</dt><dd>1ADSB</dd></div>
+            <div><dt>Disciplina</dt><dd>Arquitetura Computacional</dd></div>
+            <div><dt>Professor</dt><dd>Matheus Matos</dd></div>
+          </dl>
+        </aside>
+      </div>
+
+      <h2 class="section-title">Escolha sua missão</h2>
+      <nav class="games" aria-label="Jogos">
+        <a class="game-card gc-cruz" href="#/cruzadinha">
+          <span class="gc-icon" aria-hidden="true">
+            <svg viewBox="0 0 64 64"><g stroke="#0a0e1f" stroke-width="3" rx="3">
+              <rect x="6"  y="6"  width="16" height="16" rx="3" fill="#e9f1ff"/><rect x="24" y="6"  width="16" height="16" rx="3" fill="#e9f1ff"/><rect x="42" y="6"  width="16" height="16" rx="3" fill="#ffe66d"/>
+              <rect x="6"  y="24" width="16" height="16" rx="3" fill="#e9f1ff"/><rect x="42" y="24" width="16" height="16" rx="3" fill="#e9f1ff"/>
+              <rect x="6"  y="42" width="16" height="16" rx="3" fill="#e9f1ff"/><rect x="24" y="42" width="16" height="16" rx="3" fill="#e9f1ff"/><rect x="42" y="42" width="16" height="16" rx="3" fill="#e9f1ff"/></g>
+              <text x="14" y="19" font-size="12" font-weight="900" text-anchor="middle" fill="#0e1530">C</text>
+              <text x="32" y="19" font-size="12" font-weight="900" text-anchor="middle" fill="#0e1530">P</text>
+              <text x="50" y="19" font-size="12" font-weight="900" text-anchor="middle" fill="#0e1530">U</text>
+            </svg>
+          </span>
+          <span class="gc-tag">Missão 1</span>
+          <span class="gc-title">Cruzadinha</span>
+          <span class="gc-desc">16 termos de arquitetura para encaixar no tabuleiro. Leia a pista e digite a resposta.</span>
+          <span class="btn btn-green gc-go">Jogar &#9654;</span>
+        </a>
+
+        <a class="game-card gc-imp" href="#/impostor">
+          <span class="gc-icon" aria-hidden="true">
+            <svg viewBox="0 0 100 112" style="--c:#e5202f"><use href="#bit"/></svg>
+          </span>
+          <span class="gc-tag">Missão 2</span>
+          <span class="gc-title">Quem é o Impostor?</span>
+          <span class="gc-desc">Reunião de emergência! Um componente não pertence ao grupo. Ache o intruso e ejete.</span>
+          <span class="btn btn-red gc-go">Jogar &#9654;</span>
+        </a>
+
+        <a class="game-card gc-task" href="#/tarefas">
+          <span class="gc-icon" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none" stroke-linecap="round">
+              <g stroke="#0a0e1f" stroke-width="11"><path d="M10 14 C34 14 30 46 54 46"/><path d="M10 32 C30 32 34 14 54 14"/><path d="M10 50 C30 50 34 32 54 32"/></g>
+              <path d="M10 14 C34 14 30 46 54 46" stroke="#e5202f" stroke-width="6"/>
+              <path d="M10 32 C30 32 34 14 54 14" stroke="#2a62ff" stroke-width="6"/>
+              <path d="M10 50 C30 50 34 32 54 32" stroke="#f6d90e" stroke-width="6"/>
+              <g fill="#aebcdf" stroke="#0a0e1f" stroke-width="3"><rect x="2" y="8" width="10" height="12" rx="3"/><rect x="2" y="26" width="10" height="12" rx="3"/><rect x="2" y="44" width="10" height="12" rx="3"/><rect x="52" y="8" width="10" height="12" rx="3"/><rect x="52" y="26" width="10" height="12" rx="3"/><rect x="52" y="40" width="10" height="12" rx="3"/></g>
+            </svg>
+          </span>
+          <span class="gc-tag">Missão 3</span>
+          <span class="gc-title">Tarefas da Nave</span>
+          <span class="gc-desc">Ligue fios, calibre memórias, ordene a hierarquia e roteie os barramentos.</span>
+          <span class="btn btn-yellow gc-go">Jogar &#9654;</span>
+        </a>
+      </nav>
+    </section>
+
+    <!-- ============ CRUZADINHA ============ -->
+    <section id="view-cruzadinha" class="view" hidden aria-labelledby="cruz-title">
+      <div class="game-head">
+        <p class="kicker">Missão 1</p>
+        <h1 id="cruz-title">Cruzadinha</h1>
+        <p class="lead">Clique numa casa e digite. Clique de novo na mesma casa para trocar entre horizontal e vertical.</p>
+      </div>
+      <div id="cruz-root"></div>
+    </section>
+
+    <!-- ============ QUEM É O IMPOSTOR ============ -->
+    <section id="view-impostor" class="view" hidden aria-labelledby="imp-title">
+      <div class="game-head">
+        <p class="kicker red-k">Missão 2</p>
+        <h1 id="imp-title">Quem é o Impostor?</h1>
+      </div>
+      <div id="imp-root"></div>
+    </section>
+
+    <!-- ============ TAREFAS DA NAVE ============ -->
+    <section id="view-tarefas" class="view" hidden aria-labelledby="task-title">
+      <div class="game-head">
+        <p class="kicker yellow-k">Missão 3</p>
+        <h1 id="task-title">Tarefas da Nave</h1>
+        <p class="lead">Complete as quatro tarefas para deixar a nave 100% operacional.</p>
+      </div>
+      <div id="task-root"></div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <span>Atividade Avaliativa III · Sprint 3 · Arquitetura Computacional</span>
+  </footer>
+</div>
+
+<script src="dados.js"></script>
+<script src="cruzadinha.js"></script>
+<script src="impostor.js"></script>
+<script src="tarefas.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
