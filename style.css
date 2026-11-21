@@ -200,9 +200,11 @@ h1 { font-size: clamp(34px, 6vw, 66px); font-weight: 900; letter-spacing: -.01em
 .active-clue .ac-text { font-weight: 700; font-size: 16px; }
 
 .board-scroll { overflow-x: auto; padding: 6px; -webkit-overflow-scrolling: touch; }
-.board {
+.cruz-board-panel {
   --gap: 3px; --bw: 3px;
   --cell: clamp(17px, calc((100vw - 76px - (var(--cols) - 1) * var(--gap)) / var(--cols)), 42px);
+}
+.board {
   display: grid; grid-template-columns: repeat(var(--cols), var(--cell)); grid-auto-rows: var(--cell); gap: var(--gap); width: max-content; margin: 0 auto;
 }
 .cell {
@@ -245,7 +247,8 @@ h1 { font-size: clamp(34px, 6vw, 66px); font-weight: 900; letter-spacing: -.01em
 
 .clues-panel { padding: 24px 18px 18px; }
 .clues-panel h2 { font-size: 15px; letter-spacing: .26em; text-transform: uppercase; color: var(--cyan); margin: 4px 6px 12px; display: flex; align-items: center; gap: 10px; }
-.clues-panel h2 + ol { margin-bottom: 22px; }
+.clues-cols { display: grid; grid-template-columns: 1fr; gap: 20px; }
+@media (min-width: 700px) { .clues-cols { grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; } }
 .clues-panel ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .clue {
   width: 100%; text-align: left; display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px;
@@ -460,7 +463,7 @@ h1 { font-size: clamp(34px, 6vw, 66px); font-weight: 900; letter-spacing: -.01em
   .tp-foot { padding: 6px 12px 0; }
   .imp-status { gap: 8px; }
   main { padding: 20px 12px 40px; }
-  .board { --gap: 2px; --bw: 2px; }
+  .cruz-board-panel { --gap: 2px; --bw: 2px; }
   .cruz-board-panel { padding: 16px 10px 14px; }
   .board-scroll { padding: 0; }
   .active-clue { margin: 4px 0 12px; }
@@ -473,4 +476,80 @@ h1 { font-size: clamp(34px, 6vw, 66px); font-weight: 900; letter-spacing: -.01em
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+/* ============================================================
+   Cruzadinha em uma tela só (computador)
+   Tabuleiro à esquerda, pistas em duas colunas à direita.
+   O tamanho das casas acompanha a altura da janela.
+   ============================================================ */
+@media (min-width: 1100px) {
+  body[data-view="cruzadinha"] main { max-width: 1600px; padding: 14px 24px 16px; }
+  body[data-view="cruzadinha"] .footer { display: none; }
+
+  #view-cruzadinha .game-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 18px; margin-bottom: 12px; }
+  #view-cruzadinha .game-head .kicker { margin: 0; }
+  #view-cruzadinha .game-head h1 { font-size: 34px; text-shadow: 0 3px 0 var(--edge); }
+  #view-cruzadinha .game-head .lead { margin: 0; font-size: 14px; max-width: none; }
+
+  .cruz-layout { gap: 20px; grid-template-columns: auto minmax(0, 1fr); align-items: stretch; }
+  .cruz-board-panel { padding: 14px 14px 12px; }
+  .active-clue { min-height: 48px; margin: 4px 4px 10px; padding: 6px 12px; }
+  .active-clue .ac-text { font-size: 15px; }
+  .board-scroll { padding: 2px; }
+  .cruz-board-panel {
+    --oh: 420px;
+    --cell: clamp(20px,
+      min(calc((100vw - 640px - (var(--cols) - 1) * var(--gap)) / var(--cols)),
+          calc((100vh - var(--oh) - (var(--rows) - 1) * var(--gap)) / var(--rows))),
+      44px);
+    width: calc(var(--cols) * var(--cell) + (var(--cols) - 1) * var(--gap) + 48px);
+  }
+
+  .controls { margin: 12px 4px 0; gap: 10px; }
+  #view-cruzadinha .btn { padding: 10px 18px; font-size: 14px; margin-bottom: 6px; }
+  .score { padding: 6px 12px 8px; flex: 1 1 150px; min-width: 150px; gap: 5px; }
+  .score b { font-size: 18px; }
+  .score .taskbar { height: 12px; }
+  .status-msg { margin: 6px 4px 0; min-height: 20px; font-size: 14px; }
+  .win-banner { margin: 8px 4px 0; padding: 8px 14px; gap: 12px; }
+  .win-banner .bit { width: 38px; }
+  .win-banner b { font-size: 18px; }
+
+  /* caixa das pistas: mesma altura da caixa do tabuleiro; o texto é ajustado por JS (--clue-fs) */
+  .clues-wrap { position: relative; min-height: 0; }
+  .clues-panel { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 16px 14px 14px; overflow: hidden; }
+  .clues-cols { flex: 1; min-height: 0; gap: 16px; align-items: stretch; }
+  .clue-group { display: flex; flex-direction: column; min-height: 0; }
+  .clues-panel h2 { font-size: 14px; margin: 0 4px 10px; flex: none; }
+  .clues-panel ol { flex: 1; min-height: 0; display: grid; grid-auto-rows: minmax(0, 1fr); gap: 5px; }
+  .clues-panel li { min-height: 0; display: flex; }
+  .clue { flex: 1; align-items: center; font-size: var(--clue-fs, 14px); line-height: 1.28; padding: .2em .6em; gap: .6em; border-width: 2px; border-radius: 12px; }
+  .clue .cn { min-width: 2em; height: 1.8em; font-size: .92em; border-width: 2px; }
+  .clue .ci { width: 1.1em; font-size: 1em; }
+
+}
+
+/* janelas baixas (notebooks): compacta topo e controles para continuar em uma tela só */
+@media (min-width: 1100px) and (max-height: 820px) {
+  .topbar { padding: 5px 18px; }
+  .brand-bit { width: 30px; height: 34px; }
+  .brand-text b { font-size: 18px; }
+  .brand-text small { font-size: 9px; margin-top: 2px; }
+  .hazard { height: 8px; border-bottom-width: 3px; }
+  body[data-view="cruzadinha"] main { padding-top: 8px; padding-bottom: 8px; }
+  #view-cruzadinha .game-head { margin-bottom: 8px; }
+  #view-cruzadinha .game-head h1 { font-size: 26px; }
+  #view-cruzadinha .game-head .lead { display: none; }
+  .cruz-board-panel { --oh: 330px; padding: 10px 12px 8px; }
+  .active-clue { min-height: 40px; margin: 2px 2px 8px; padding: 4px 10px; }
+  .active-clue .ac-text { font-size: 14px; }
+  .active-clue .ac-num { padding: 3px 6px; font-size: 13px; }
+  .controls { margin-top: 8px; gap: 8px; }
+  #view-cruzadinha .btn { padding: 8px 14px; font-size: 13px; margin-bottom: 4px; }
+  .score { padding: 4px 10px 6px; gap: 3px; }
+  .score b { font-size: 16px; }
+  .score .taskbar { height: 10px; }
+  .status-msg { margin-top: 2px; min-height: 18px; font-size: 13px; }
+  .clues-panel { padding-top: 12px; }
 }

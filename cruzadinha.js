@@ -5,7 +5,35 @@
 
   const raiz = document.getElementById("cruz-root");
   let montado = false;
-  window.GAMES.cruzadinha = { mount: function () { if (!montado) { montar(); montado = true; } } };
+  window.GAMES.cruzadinha = {
+    mount: function () {
+      if (!montado) { montar(); montado = true; }
+      requestAnimationFrame(ajustarPistas);
+    }
+  };
+
+  /* No computador, a caixa das pistas tem a mesma altura do tabuleiro.
+     Aqui o texto cresce até o maior tamanho que ainda cabe na caixa. */
+  const TELA_GRANDE = window.matchMedia("(min-width: 1100px)");
+  function ajustarPistas() {
+    const painel = raiz.querySelector(".clues-panel");
+    if (!painel) return;
+    painel.style.removeProperty("--clue-fs");
+    if (!TELA_GRANDE.matches || painel.offsetParent === null) return;
+    const botoes = Array.from(painel.querySelectorAll(".clue"));
+    const estoura = function () {
+      return botoes.some(function (b) {
+        return b.querySelector(".ct").offsetHeight > b.clientHeight - 8;
+      });
+    };
+    let fs = 18;
+    painel.style.setProperty("--clue-fs", fs + "px");
+    while (fs > 11 && estoura()) {
+      fs -= 0.5;
+      painel.style.setProperty("--clue-fs", fs + "px");
+    }
+  }
+  window.addEventListener("resize", ajustarPistas);
 
   const LINHAS = Math.max.apply(null, PALAVRAS.map(function (p) { return p.r + (p.d === "V" ? p.resp.length : 1); }));
   const COLUNAS = Math.max.apply(null, PALAVRAS.map(function (p) { return p.c + (p.d === "H" ? p.resp.length : 1); }));
@@ -63,7 +91,8 @@
 
     const rolagem = el("div", "board-scroll");
     const tab = el("div", "board");
-    tab.style.setProperty("--cols", COLUNAS);
+    layout.style.setProperty("--cols", COLUNAS);
+    layout.style.setProperty("--rows", LINHAS);
     tab.setAttribute("role", "group");
     tab.setAttribute("aria-label", "Tabuleiro da cruzadinha");
 
@@ -113,6 +142,8 @@
 
     // --- pistas ---
     const pistas = el("div", "panel clues-panel");
+    const colunasPistas = el("div", "clues-cols");
+    pistas.appendChild(colunasPistas);
     [["H", "Horizontais", "→"], ["V", "Verticais", "↓"]].forEach(function (g) {
       const h = el("h2", "", g[2] + " " + g[1]);
       const ol = document.createElement("ol");
@@ -126,10 +157,14 @@
         li.appendChild(b);
         ol.appendChild(li);
       });
-      pistas.append(h, ol);
+      const grupo = el("div", "clue-group");
+      grupo.append(h, ol);
+      colunasPistas.appendChild(grupo);
     });
 
-    layout.append(painel, pistas);
+    const envoltorio = el("div", "clues-wrap");
+    envoltorio.appendChild(pistas);
+    layout.append(painel, envoltorio);
     raiz.appendChild(layout);
 
     bConferir.addEventListener("click", conferir);

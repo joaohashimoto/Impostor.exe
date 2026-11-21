@@ -20,6 +20,7 @@
 
     Object.keys(views).forEach(function (k) { views[k].hidden = k !== nome; });
     btnMenu.hidden = nome === "home";
+    document.body.dataset.view = nome;
     document.title = TITULOS[nome];
 
     const jogo = window.GAMES && window.GAMES[nome];
