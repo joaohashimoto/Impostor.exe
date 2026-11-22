@@ -51,6 +51,18 @@
 
   let rodadas = [], idx = 0, acertos = 0, travado = false;
 
+  /* Recorde guardado no navegador (se o armazenamento estiver bloqueado, o jogo segue sem ele). */
+  const CHAVE_RECORDE = "impostor-exe-recorde";
+  function lerRecorde() {
+    try {
+      const n = parseInt(localStorage.getItem(CHAVE_RECORDE), 10);
+      return isNaN(n) ? null : n;
+    } catch (e) { return null; }
+  }
+  function salvarRecorde(n) {
+    try { localStorage.setItem(CHAVE_RECORDE, String(n)); } catch (e) { /* sem armazenamento */ }
+  }
+
   function embaralhar(a) {
     const b = a.slice();
     for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = b[i]; b[i] = b[j]; b[j] = t; }
@@ -60,10 +72,14 @@
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 
   function telaInicial() {
+    const recorde = lerRecorde();
+    const linhaRecorde = recorde === null ? "" :
+      '<p>Seu recorde: <b style="color:var(--yellow)">' + recorde + "/" + TOTAL_RODADAS + "</b></p>";
     raiz.innerHTML =
       '<div class="imp-wrap"><div class="panel imp-intro">' + BIT("#e5202f") +
       "<h2>Reunião de emergência!</h2>" +
       "<p>Um componente se infiltrou no grupo. Em cada rodada, você vê quatro suspeitos: três pertencem à mesma categoria e um é o <b>impostor</b>. Clique no intruso para ejetá-lo.</p>" +
+      linhaRecorde +
       '<button class="btn btn-red" id="imp-start" type="button">Iniciar reunião</button></div></div>';
     document.getElementById("imp-start").addEventListener("click", iniciar);
   }
@@ -136,6 +152,13 @@
   }
 
   function resultado() {
+    const anterior = lerRecorde();
+    const novoRecorde = anterior === null || acertos > anterior;
+    if (novoRecorde) salvarRecorde(acertos);
+    const melhor = novoRecorde ? acertos : anterior;
+    const linhaRecorde = novoRecorde
+      ? '<p><b style="color:var(--yellow)">Novo recorde!</b> Sua melhor pontuação agora é ' + melhor + "/" + rodadas.length + ".</p>"
+      : "<p>Seu recorde continua sendo <b style=\"color:var(--yellow)\">" + melhor + "/" + rodadas.length + "</b>. Dá para superar!</p>";
     let titulo, texto, cor;
     if (acertos >= 9) { titulo = "Tripulação a salvo!"; texto = "Quase nenhum impostor escapou. Você domina os componentes do computador."; cor = "#2edb6a"; }
     else if (acertos >= 6) { titulo = "Missão quase perfeita"; texto = "Você pegou a maioria dos impostores. Revise os que passaram e jogue de novo."; cor = "#f6d90e"; }
@@ -144,7 +167,7 @@
     raiz.innerHTML =
       '<div class="imp-wrap"><div class="panel result">' + BIT(cor) +
       '<div class="big"><span>' + acertos + "</span>/" + rodadas.length + "</div>" +
-      "<h2>" + titulo + "</h2><p>" + texto + "</p>" +
+      "<h2>" + titulo + "</h2><p>" + texto + "</p>" + linhaRecorde +
       '<div class="row"><button class="btn btn-red" id="imp-again" type="button">Jogar de novo</button>' +
       '<a class="btn btn-ghost" href="#/">Voltar ao menu</a></div></div></div>';
     document.getElementById("imp-again").addEventListener("click", iniciar);
