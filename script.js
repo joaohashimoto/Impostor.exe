@@ -3,10 +3,10 @@
   "use strict";
 
   const TITULOS = {
-    home: "ArqComp · Operação Impostor",
-    cruzadinha: "Cruzadinha · ArqComp",
-    impostor: "Quem é o Impostor? · ArqComp",
-    tarefas: "Tarefas da Nave · ArqComp"
+    home: "Impostor.exe · Arquitetura Computacional",
+    cruzadinha: "Cruzadinha · Impostor.exe",
+    impostor: "Quem é o Impostor? · Impostor.exe",
+    tarefas: "Tarefas da Nave · Impostor.exe"
   };
   const views = {};
   document.querySelectorAll(".view").forEach(function (v) {
